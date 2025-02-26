@@ -121,7 +121,7 @@ def compile_proc(proc_folder, test_name, test_folder="test_files"):
         HTMLGenerator.add_content(test_name, html_result)
         if not (html_result == "All registers passed!"):
             HTMLGenerator.set_state(test_name, 0)
-        else:
+        elif not (HTMLGenerator.get_state(test_name) == 1):
             HTMLGenerator.set_state(test_name, 2)
     
     with ProcResult.logger_lock:
@@ -161,6 +161,7 @@ def compile_all_procs(tests, procs_folder="example", en_mt=True, wrapper_path=dv
     original_directory = os.getcwd()
 
     for proc in os.listdir(procs_folder):
+        HTMLGenerator.clear()
         if os.path.isdir(os.path.join(procs_folder, proc)):
             proc_folder = os.path.join(procs_folder, proc)
             current_proc = ProcResult(proc, ProcResult.read_exp(proc_folder))
@@ -176,7 +177,7 @@ def compile_all_procs(tests, procs_folder="example", en_mt=True, wrapper_path=dv
             # Generate FileList
             file_list(proc_folder, wrapper_path)
 
-            if config_data.get("EN_VERILOG_CHECK", False):
+            if config_data.getboolean("PROCESSOR", "EN_VERILOG_CHECK", fallback=False):
                 # Initalize banned Verilog block
                 Logger.info("Checking for banned Verilog constructs...")
                 HTMLGenerator.add_content(dv.BANNED_VERILOG_TITLE, "==================== DISCLAIMER ====================\n \nThis automated banned Verilog checker may produce false positives and false negatives. Your final Gradescope submission will be checked manually for banned Verilog constructs. \n \nPlease reference the Checkpoint 4: Processor document for the full list of banned Verilog constructs.")
@@ -220,8 +221,7 @@ def compile_all_procs(tests, procs_folder="example", en_mt=True, wrapper_path=dv
             os.chdir(original_directory)
             Logger.info(f"Processor {proc} compiled successfully.")
 
-            html_file = HTMLGenerator.generate_html_report(output_dir="html_reports", theme=config_data.get("THEME", "LIGHT"), test_folder=test_folder, name=proc)
-            HTMLGenerator.clear()
+            html_file = HTMLGenerator.generate_html_report(output_dir="html_reports", theme=config_data.get("HTML", "THEME", fallback="LIGHT"), test_folder=test_folder, name=proc, EN_MT=en_mt)
             Logger.info(f"HTML report generated at {html_file}")
 
     sorted_results = sorted(proc_results, key=lambda x: x.name)

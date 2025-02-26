@@ -24,13 +24,13 @@ nop
 addi $r20, $r0, 2     # missed branch (rs bypassing into bne)
 nop
 correcttwo: nop
-lw $r6 7($r0)
+lw $r6, 7($r0)
 blt $r6, $r0, correctthree
 nop
 addi $r20, $r0, 4     # missed branch (rd bypassing into blt)
 nop
 correctthree: nop
-lw $r7 5($r0)
+lw $r7, 5($r0)
 blt $r0, $r7, correctfour
 nop
 addi $r20, $r0, 8     # missed branch (rs bypassing into blt)

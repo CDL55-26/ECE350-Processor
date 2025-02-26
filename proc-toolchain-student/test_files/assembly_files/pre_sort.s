@@ -37,7 +37,7 @@ nop
 nop
 nop                 # Test 2: lw into blt hazard + bypass
 lw $13, 2($0)
-blt $13, $2 e3
+blt $13, $2, e3
 nop
 nop
 addi $r20, $r20, 1	# r20 += 1 (Incorrect)
@@ -49,7 +49,7 @@ nop
 nop
 nop
 lw $14, 2($0)
-blt $3, $14 e4
+blt $3, $14, e4
 nop
 nop
 addi $r20, $r20, 1	# r20 += 1 (Incorrect)

@@ -5,11 +5,12 @@ Generates HTML reports summarizing the results of the tests.
 """
 
 from datetime import datetime
+import json
 import os
 from helper_scripts.reformat import *
 import random
 from helper_scripts.logger import Logger
-
+from helper_scripts.util import get_version
 class HTMLContent:
     def __init__(self, title):
         self.title = title
@@ -27,11 +28,83 @@ class HTMLContent:
         1: Passed with warnings
         2: Passed test - show title in green and no content
         """
+    
+    # TODO: formalize state machine for transition rules between states. Not all states reset on a new processor because .s files only compile once per processor. This only affects TA usage and not student usage. 
+    def reset_state(self):
+        if self.state != -1:
+            self.state = 2
+    
+    def to_dict(self):
+        """JSON serialization"""
+        return {
+            'title': self.title,
+            'state': self.state,
+            'content_blocks': [block.to_dict() for block in self.content_blocks]
+        }
+    
+    def equals(self, other):
+        if self.title != other.title or self.state != other.state:
+            return False
+
+    def equals(self, other):
+        if self.title != other.title or self.state != other.state:
+            return False
+            
+        self_blocks = sorted(self.content_blocks, key=lambda x: x.text)
+        other_blocks = sorted(other.content_blocks, key=lambda x: x.text)
+        
+        if len(self_blocks) != len(other_blocks):
+            return False
+            
+        for self_block, other_block in zip(self_blocks, other_blocks):
+            if not self_block.equals(other_block):
+                return False
+                
+        return True
+    
+    @classmethod
+    def from_dict(cls, data):
+        """JSON deserialization"""
+        content = cls(data['title'])
+        content.state = data['state']
+        content.content_blocks = [ContentBlock.from_dict(block) for block in data['content_blocks']]
+        return content
+
+    def __str__(self):
+        return f"HTMLContent(title='{self.title}', state={self.state}, blocks={self.content_blocks})"
+    
+    def __repr__(self):
+        return self.__str__()
 
 class ContentBlock:
     def __init__(self, text, keep=False):
         self.text = text
         self.keep = keep  # keep across clears
+
+    def to_dict(self):
+        """JSON serialization"""
+        return {
+            'text': self.text,
+            'keep': self.keep
+        }
+    
+    def equals(self, other):
+        return self.text == other.text and self.keep == other.keep
+    
+    @classmethod
+    def from_dict(cls, data):
+        """JSON deserialization"""
+        return cls(data['text'], data['keep'])
+
+    def __str__(self):
+        # Truncate text to 50 characters
+        preview = self.text[:50] + "..." if len(self.text) > 50 else self.text
+        # Replace newlines with \n for better readability
+        preview = preview.replace('\n', '\\n')
+        return f"ContentBlock(text='{preview}', keep={self.keep})"
+    
+    def __repr__(self):
+        return self.__str__()
 
 class HTMLGenerator:
     _content_map = {}  # Static map of title -> HTMLContent object
@@ -67,9 +140,17 @@ class HTMLGenerator:
             cls._content_map[title].state = state
 
     @classmethod
-    def generate_html_report(cls, output_dir, theme="LIGHT", test_folder="test_files", name="proc"):
+    def get_state(cls, title):
+        """Get the state of a specific HTMLContent object
+        Args:
+            title (str): The title/key of the content to get
+        """
+        return cls._content_map[title].state
+    
+    @classmethod
+    def generate_html_report(cls, output_dir, theme="LIGHT", test_folder="test_files", name="proc", EN_MT=False):
         """Generate HTML report from the content map"""
-        time_saved = round(random.uniform(8.73, 114.29), 2)
+        time_saved = round(random.uniform(8.73, 114.29) * (random.uniform(1.01, 1.25) if EN_MT else 1), 2) 
         
         # Set initial theme based on config
         initial_theme_class = "dark-mode" if theme.upper() == "DARK" else ""
@@ -386,6 +467,7 @@ class HTMLGenerator:
                     <h1>Test Results - {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</h1>
                 </div>
                 <div class="description">You saved {time_saved} seconds by running this script instead of uploading to Gradescope.</div>
+                <div class="description">Build version: {get_version()}</div>
         """
 
         sorted_items = sorted(
@@ -496,19 +578,39 @@ class HTMLGenerator:
     
     @classmethod
     def clear(cls):
-        """Clear the content map"""
-        # Create a list of keys to remove
+        """Clear the content map unless keep is set. Some items, like asm file contents, should not be cleared between runs."""
         keys_to_remove = []
         
-        # Iterate through all content entries
         for title, content in cls._content_map.items():
-            # Filter content blocks based on keep flag
             content.content_blocks = [block for block in content.content_blocks if block.keep]
             
-            # If no content blocks remain, mark key for removal
+            content.reset_state()
+
             if not content.content_blocks:
                 keys_to_remove.append(title)
         
-        # Remove empty content entries
         for key in keys_to_remove:
             del cls._content_map[key]
+    
+    @classmethod
+    def full_clear(cls):
+        """Full clear, for unit/integration testing purposes"""
+        cls._content_map = {}
+        cls._output_file = None
+
+    @classmethod
+    def export_snapshot(cls, output_dir, filename="results.json"):
+        """Export the content map to a JSON file - for testing purposes"""
+        os.makedirs(output_dir, exist_ok=True)
+
+        content_list = list(cls._content_map.values())
+        content_list.sort(key=lambda x: x.title)
+
+        json_file = os.path.join(output_dir, filename)
+        
+        # Write to JSON file
+        with open(json_file, 'w', encoding='utf-8') as f:
+            json.dump([content.to_dict() for content in content_list], f, indent=4)
+
+        return json_file
+        

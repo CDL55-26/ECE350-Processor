@@ -19,7 +19,7 @@ nop			            # flushed instruction
 nop			            # flushed instruction
 addi 	$r20, $r20, 1	# $r20 += 1 (Incorrect)
 addi 	$r21, $r21, 1	# $r21 += 1 (Incorrect)
-addi 	$r22, $r22 1	# $r22 += 1 (Incorrect)
+addi 	$r22, $r22, 1	# $r22 += 1 (Incorrect)
 b1: 
 addi 	$r10, $r10, 1	# $r10 += 1 (Correct)
 bne 	$r2, $r2, b2	# r2 == r2 --> not taken

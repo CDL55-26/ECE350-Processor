@@ -16,7 +16,7 @@ from helper_scripts.html_generator import HTMLGenerator
 absolutely_banned = ['automatic', 'buf', 'bufif0', 'bufif1', 'cell', 'cmos', 'config', 'deassign', 'defparam', 'design', 'disable', 'endconfig', 'endfunction', 'endprimitive', 'endspecify', 'endtable', 'endtask', 'event', 'force', 'forever', 'fork', 'function', 'highz0', 'highz1', 'ifnone', 'incdir', 'include', 'instance', 'join', 'larger', 'liblist', 'library', 'macromodule', 'medium', 'nmos', 'noshow-cancelled', 'notif0', 'notif1', 'pmos', 'primitive', 'pull0', 'pull1', 'pullup', 'pulldown', 'pulsestyle_ondetect', 'pulsestyle_onevent', 'rcmos', 'real', 'realtime', 'release', 'rnmos', 'rpmos', 'rtran', 'rtranif0', 'rtranif1', 'scalared', 'show-cancelled', 'small', 'specify', 'specpa', 'strong0', 'strong1', 'supply0', 'supply1', 'table', 'task', 'time', 'tran', 'tranif0', 'tranif1', 'tri', 'tri0', 'tri1', 'triand', 'trior', 'trireg', 'use', 'vectored', 'wait', 'wand', 'weak0', 'weak1', 'wor']
 
 # banned - these are banned but also likely to be used
-banned = ['always', 'case', 'casex', 'casez', 'default', 'edge', 'else', 'endcase', 'if', 'initial', 'integer', 'negedge', 'posedge', 'reg', 'repeat', 'signed', 'while']
+banned = ['always', 'case', 'casex', 'casez', 'default', 'edge', 'else', 'endcase', 'if', 'initial', 'integer', 'negedge', 'posedge', 'reg', 'repeat', 'while']
 
 # pay attention to these ones
 attention = ['begin', 'end', 'endgenerate', 'for', 'generate', 'genvar', 'inout', 'input', 'localparam', 'output', 'parameter']

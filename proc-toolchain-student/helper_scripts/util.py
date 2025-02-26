@@ -24,8 +24,8 @@ def delete_old_files(directory, num_to_keep=5):
         for file, _ in files_to_delete:
             os.remove(file)
         
-    except OSError as e:
-        print(f"Failed to delete files: {e}")  # circular import prevents the use of Logger here
+    except OSError:
+        return
 
 def delete_old_folders(directory, num_to_keep=5):
     
@@ -46,3 +46,12 @@ def delete_old_folders(directory, num_to_keep=5):
         
     except OSError as e:
         print(f"Failed to delete folders: {e}")
+
+def get_version():
+    try:
+        with open(".version", "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "unknown"
+    except IOError:
+        return "unknown"

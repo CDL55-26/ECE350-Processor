@@ -8,7 +8,7 @@ import os
 from helper_scripts.logger import Logger
 from helper_scripts.html_generator import HTMLGenerator
 
-def assemble_lab9(file_path, canonical_name, asm_dir, mem_dir):
+def assemble_lab(file_path, canonical_name, asm_dir, mem_dir):
 
     # Setup output path
     mem_path = os.path.join(mem_dir, canonical_name + '.mem')
