@@ -1,0 +1,335 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Test Results</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .section { margin: 20px 0; padding: 10px; border: 1px solid #eee; border-radius: 8px; }
+                .header { 
+                    background-color: #f5f5f5; 
+                    padding: 10px; 
+                    display: flex;
+                    align-items: center;
+                    cursor: pointer;
+                    user-select: none;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    border-radius: 8px;
+                }
+                .header span { 
+                    font-size: 1.2em;
+                    font-weight: bold;
+                    margin-left: 3px;
+                    margin-right: 30px;
+                }
+                .success { color: #23a645; }
+                .failure { color: #f03d30; }
+                .warning { color: #FF9500; }
+                .not-run { color: #BBBBBB; }
+                .toc-link.success { color: #23a645; }
+                .toc-link.failure { color: #f03d30; }
+                .toc-link.warning { color: #FF9500; }
+                .toc-link.not-run { color: #BBBBBB; }
+                .content-block { margin: 10px 0; padding: 10px; background-color: #f9f9f9; border-radius: 8px; }
+                .content-block:last-child {
+                    margin-bottom: 0;  /* Removes bottom margin from last content block */
+                }
+                .content-block div { 
+                    white-space: pre-wrap;
+                    font-family: monospace;
+                    tab-size: 5;
+                    -moz-tab-size: 5;
+                    word-wrap: break-word;
+                    overflow-wrap: break-word;
+                }
+                .collapse-btn {
+                    cursor: pointer;
+                    border: none;
+                    background: none;
+                    font-size: 1.2em;
+                    padding: 0 10px;
+                    color: inherit;
+                    user-select: none;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                }
+                .content-container {
+                    display: block;
+                }
+                .content-container.collapsed {
+                    display: none;
+                }
+                .description {
+                    color: #666;
+                    font-style: italic;
+                    margin-bottom: 20px;
+                    margin-left: 3px;
+                }
+                .theme-toggle {
+                    flex: 1;
+                    padding: 10px 20px;
+                    background-color: #017AFF;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                }
+                .float-button {
+                    flex: 1;
+                    padding: 10px 20px;
+                    background-color: #017AFF;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+                }
+                /* Add dark mode styles */
+                body.dark-mode { 
+                    background-color: #1a1a1a; 
+                    color: #ffffff; 
+                }
+                body.dark-mode .section { 
+                    border-color: #444; 
+                }
+                body.dark-mode .header { 
+                    background-color: #2d2d2d; 
+                }
+                body.dark-mode .content-block { 
+                    background-color: #2d2d2d; 
+                }
+                body.dark-mode .failure { 
+                    color: #FF443B;  
+                }
+                body.dark-mode .success { 
+                    color: #32D84C; 
+                }
+                body.dark-mode .description { 
+                    color: #e1e1e1; /* match title color */
+                }
+                body.dark-mode .not-run { 
+                    color: #777777; 
+                }
+                .copy-button {
+                    padding: 5px 10px;
+                    color: white;
+                    border: none;
+                    border-radius: 3px;
+                    cursor: pointer;
+                    margin-left: 0px;
+                    user-select: none;
+                    -webkit-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                }
+                .copy-button.success {
+                    background-color: #23a645;
+                    color: white;
+                }
+                .copy-button.success:hover {
+                    background-color: #45d86c;
+                    color: white;
+                }
+                .copy-button.failure {
+                    background-color: #f03d30;
+                    color: white;
+                }
+                .copy-button.failure:hover {
+                    background-color: #ff524a;
+                    color: white;
+                }
+                body.dark-mode .copy-button.success {
+                    background-color: #28b040;
+                    color: #ffffff;
+                }
+                body.dark-mode .copy-button.success:hover {
+                    background-color: #32c94c;
+                    color: #ffffff;
+                }
+                body.dark-mode .copy-button.failure {
+                    background-color: #FF443B;
+                    color: #ffffff;
+                }
+                body.dark-mode .copy-button.failure:hover {
+                    background-color: #ff5a52;
+                    color: #ffffff;
+                }
+                .copy-button.warning {
+                    background-color: #FF9500;
+                    color: white;
+                }
+                .copy-button.warning:hover {
+                    background-color: #ffaa33;
+                    color: white;
+                }
+                body.dark-mode .copy-button.warning {
+                    background-color: #FF9500;
+                    color: #ffffff;
+                }
+                body.dark-mode .copy-button.warning:hover {
+                    background-color: #ffaa33;
+                    color: #ffffff;
+                }
+                /* Add new sidebar styles */
+                .sidebar {
+                    position: fixed;
+                    right: 20px;
+                    top: 80px;
+                    width: 250px;
+                    padding: 20px;
+                    background-color: #f5f5f5;
+                    border-radius: 8px;
+                    max-height: calc(100vh - 140px);
+                    overflow-y: auto;
+                    z-index: 999;
+                }
+                body.dark-mode .sidebar {
+                    background-color: #2d2d2d;
+                }
+                .sidebar-title {
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                }
+                .toc-link {
+                    display: block;
+                    padding: 5px 0;
+                    text-decoration: none;
+                    color: inherit;
+                }
+                .toc-link:hover {
+                    text-decoration: underline;
+                }
+                .main-content {
+                    margin-right: 300px;
+                    margin-top: 20px;
+                }
+                .button-container {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                    width: 100%;
+                    position: fixed;
+                    right: 20px;
+                    top: 20px;
+                    width: 290px;
+                    z-index: 999;
+                }
+            </style>
+            <script>
+                function toggleContent(buttonElement) {
+                    const container = buttonElement.parentElement.nextElementSibling;
+                    const isCollapsed = container.classList.contains('collapsed');
+                    container.classList.toggle('collapsed');
+                    buttonElement.textContent = isCollapsed ? '▽' : '▷';
+
+                    const allSections = document.querySelectorAll('.content-container');
+                    const allCollapsed = Array.from(allSections).every(section => 
+                        section.classList.contains('collapsed')
+                    );
+                    
+                    // Update floating button text accordingly
+                    const toggleButton = document.getElementById('toggleButton');
+                    toggleButton.textContent = allCollapsed ? 'Expand Failed' : 'Collapse All';
+                }
+
+                function toggleAll() {
+                    const button = document.getElementById('toggleButton');
+                    const isCollapsed = button.textContent === 'Expand Failed';
+                    const sections = document.querySelectorAll('.section');
+                    
+                    if (isCollapsed) {
+                        // Expand failed tests
+                        sections.forEach(section => {
+                            if (section.querySelector('.header.failure') || section.querySelector('.header.not-run')) {
+                                const container = section.querySelector('.content-container');
+                                const btn = section.querySelector('.collapse-btn');
+                                container.classList.remove('collapsed');
+                                btn.textContent = '▽';
+                            }
+                        });
+                        button.textContent = 'Collapse All';
+                    } else {
+                        // Collapse all
+                        sections.forEach(section => {
+                            const container = section.querySelector('.content-container');
+                            const btn = section.querySelector('.collapse-btn');
+                            container.classList.add('collapsed');
+                            btn.textContent = '▷';
+                        });
+                        button.textContent = 'Expand Failed';
+                    }
+                }
+
+                function toggleTheme() {
+                    const body = document.body;
+                    const button = document.getElementById('themeToggle');
+                    body.classList.toggle('dark-mode');
+                    button.textContent = body.classList.contains('dark-mode') ? '☀️ Light Mode' : '🌙 Dark Mode';
+                }
+
+                function copyGTKWaveCommand(title) {
+                    const command = `gtkwave test_files/output_files/${title}.vcd`;
+                    navigator.clipboard.writeText(command);
+                    
+                    // Optional: Show feedback that command was copied
+                    const button = event.target;
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    setTimeout(() => button.textContent = originalText, 1000);
+                }
+
+                function scrollToSection(id) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            </script>
+        </head>
+        <body class="dark-mode">
+            <div class="button-container">
+                <button id="toggleButton" class="float-button" onclick="toggleAll()">Collapse All</button>
+                <button id="themeToggle" class="theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
+            </div>
+            <div class="sidebar">
+                <div class="sidebar-title">Test List</div>
+                <div class="sidebar-content">
+                    <!-- TOC links will be added here dynamically -->
+                </div>
+            </div>
+            <div class="main-content">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Test Results - 2025-02-26 18:52:31</h1>
+                </div>
+                <div class="description">You saved 53.54 seconds by running this script instead of uploading to Gradescope.</div>
+                <div class="description">Build version: 1.0.1</div>
+        
+            <script>
+                document.querySelector('.sidebar-content').innerHTML = `<a href="javascript:void(0)" onclick="scrollToSection('section-Banned-Verilog-Check')" class="toc-link success">Banned Verilog Check</a><a href="javascript:void(0)" onclick="scrollToSection('section-negative_no_bypass')" class="toc-link not-run">negative_no_bypass</a><a href="javascript:void(0)" onclick="scrollToSection('section-positive_no_bypass')" class="toc-link not-run">positive_no_bypass</a>`;
+            </script>
+        <div class="section" id="section-Banned-Verilog-Check">
+                <div class='header success' onclick='toggleContent(this.querySelector(".collapse-btn"))'>
+                    <button class='collapse-btn'>▷</button>
+                    <span>Banned Verilog Check</span>
+                    
+                </div>
+            <div class='content-container collapsed'><div class='content-block'><div class=''>==================== DISCLAIMER ====================</div><div class=''> </div><div class=''>This automated banned Verilog checker may produce false positives and false negatives. Your final Gradescope submission will be checked manually for banned Verilog constructs. </div><div class=''> </div><div class=''>Please reference the Checkpoint 4: Processor document for the full list of banned Verilog constructs.</div></div></div></div><div class="section" id="section-negative_no_bypass">
+                <div class='header not-run' onclick='toggleContent(this.querySelector(".collapse-btn"))'>
+                    <button class='collapse-btn'>▽</button>
+                    <span>negative_no_bypass</span>
+                    
+                </div>
+            <div class='content-container '><div class='content-block'><div class=''>nop 			# Basic Arithmetic Test with no Hazards</div><div class=''>nop 			# Values initialized using addi (positive only) and sub</div><div class=''>nop 			# Author: Oliver Rodas</div><div class=''>nop</div><div class=''>nop</div><div class=''>nop 			# Initialize Values</div><div class=''>addi $3, $0, 1	# r3 = 1</div><div class=''>addi $4, $0, 35	# r4 = 35</div><div class=''>addi $1, $0, 3	# r1 = 3</div><div class=''>addi $2, $0, 21	# r2 = 21</div><div class=''>sub $3, $0, $3	# r3 = -1</div><div class=''>sub $4, $0, $4	# r4 = -35</div><div class=''>nop </div><div class=''>nop 			# Negative Value Tests</div><div class=''>addi $11, $2, -89	# r11 = r2 - 89 = -68</div><div class=''>add $12, $4, $2	# r12 = r4 + r2 = -14</div><div class=''>sub $13, $4, $2	# r13 = r4 - r2 = -56</div><div class=''>sll $14, $3, 16	# r14 = r3 << 16 = -65536</div><div class=''>sra $15, $4, 16	# r15 = r4 >> 16 = -1</div></div><div class='content-block'><div class=''>num cycles:24</div></div><div class='content-block'><div class=''>==================== Compilation Issues ====================</div><div class=''>./ALU_vFIles/CLA32.v:1: error: 'CLA32' has already been declared in this scope.</div><div class=''>./multDiv_files/CLA32.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/CLA32.v:41: error: Module CLA32 was already declared here: ./multDiv_files/CLA32.v:1</div><div class=''></div><div class=''>./ALU_vFIles/mux_4.v:1: error: 'mux_4' has already been declared in this scope.</div><div class=''>./multDiv_files/mux_4.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/mux_4.v:10: error: Module mux_4 was already declared here: ./multDiv_files/mux_4.v:1</div><div class=''></div><div class=''>./ALU_vFIles/CLA8.v:1: error: 'CLA8' has already been declared in this scope.</div><div class=''>./multDiv_files/CLA8.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/CLA8.v:135: error: Module CLA8 was already declared here: ./multDiv_files/CLA8.v:1</div><div class=''></div><div class=''>./ALU_vFIles/Tcomp_unit.v:1: error: 'Tcomp_unit' has already been declared in this scope.</div><div class=''>./multDiv_files/Tcomp_unit.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/Tcomp_unit.v:42: error: Module Tcomp_unit was already declared here: ./multDiv_files/Tcomp_unit.v:1</div><div class=''></div><div class=''>./ALU_vFIles/full_adder.v:1: error: 'full_adder' has already been declared in this scope.</div><div class=''>./multDiv_files/full_adder.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/full_adder.v:8: error: Module full_adder was already declared here: ./multDiv_files/full_adder.v:1</div><div class=''></div><div class=''>./ALU_vFIles/mux_2.v:1: error: 'mux_2' has already been declared in this scope.</div><div class=''>./multDiv_files/mux_2.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/mux_2.v:7: error: Module mux_2 was already declared here: ./multDiv_files/mux_2.v:1</div><div class=''></div><div class=''>./RegGile_files/dffe_ref.v:1: error: 'dffe_ref' has already been declared in this scope.</div><div class=''>./multDiv_files/dffe_ref.v:1:      : It was declared here as a module.</div><div class=''>./RegGile_files/dffe_ref.v:31: error: Module dffe_ref was already declared here: ./multDiv_files/dffe_ref.v:1</div></div><div class='content-block'><div class=''>==================== Results ====================</div></div><div class='content-block'><div class=''>==================== Runtime Errors ====================</div><div class=''>proc_negative_no_bypass.vvp: Unable to open input file.</div></div></div></div><div class="section" id="section-positive_no_bypass">
+                <div class='header not-run' onclick='toggleContent(this.querySelector(".collapse-btn"))'>
+                    <button class='collapse-btn'>▽</button>
+                    <span>positive_no_bypass</span>
+                    
+                </div>
+            <div class='content-container '><div class='content-block'><div class=''>nop 			# Basic Arithmetic Test with no Hazards</div><div class=''>nop 			# Values initialized using addi (positive only) and sub</div><div class=''>nop 			# Author: Oliver Rodas</div><div class=''>nop</div><div class=''>nop</div><div class=''>nop 			# Initialize Values</div><div class=''>addi $3, $0, 1	# r3 = 1</div><div class=''>addi $4, $0, 35	# r4 = 35</div><div class=''>addi $1, $0, 3	# r1 = 3</div><div class=''>addi $2, $0, 21	# r2 = 21</div><div class=''>sub $3, $0, $3	# r3 = -1</div><div class=''>sub $4, $0, $4	# r4 = -35</div><div class=''>nop </div><div class=''>nop 			# Positive Value Tests</div><div class=''>add $5, $2, $1	# r5 = r2 + r1 = 24</div><div class=''>sub $6, $2, $1	# r6 = r2 - r1 = 18</div><div class=''>and $7, $2, $1	# r7 = r2 & r1 = 1</div><div class=''>or $8, $2, $1 	# r8 = r2 | r1 = 23</div><div class=''>sll $9, $1, 4 	# r9 = r1 << 4 = 48</div><div class=''>sra $10, $2, 2	# r10 = r2 >> 2 = 5</div></div><div class='content-block'><div class=''>num cycles:25</div></div><div class='content-block'><div class=''>==================== Compilation Issues ====================</div><div class=''>./ALU_vFIles/CLA32.v:1: error: 'CLA32' has already been declared in this scope.</div><div class=''>./multDiv_files/CLA32.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/CLA32.v:41: error: Module CLA32 was already declared here: ./multDiv_files/CLA32.v:1</div><div class=''></div><div class=''>./ALU_vFIles/mux_4.v:1: error: 'mux_4' has already been declared in this scope.</div><div class=''>./multDiv_files/mux_4.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/mux_4.v:10: error: Module mux_4 was already declared here: ./multDiv_files/mux_4.v:1</div><div class=''></div><div class=''>./ALU_vFIles/CLA8.v:1: error: 'CLA8' has already been declared in this scope.</div><div class=''>./multDiv_files/CLA8.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/CLA8.v:135: error: Module CLA8 was already declared here: ./multDiv_files/CLA8.v:1</div><div class=''></div><div class=''>./ALU_vFIles/Tcomp_unit.v:1: error: 'Tcomp_unit' has already been declared in this scope.</div><div class=''>./multDiv_files/Tcomp_unit.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/Tcomp_unit.v:42: error: Module Tcomp_unit was already declared here: ./multDiv_files/Tcomp_unit.v:1</div><div class=''></div><div class=''>./ALU_vFIles/full_adder.v:1: error: 'full_adder' has already been declared in this scope.</div><div class=''>./multDiv_files/full_adder.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/full_adder.v:8: error: Module full_adder was already declared here: ./multDiv_files/full_adder.v:1</div><div class=''></div><div class=''>./ALU_vFIles/mux_2.v:1: error: 'mux_2' has already been declared in this scope.</div><div class=''>./multDiv_files/mux_2.v:1:      : It was declared here as a module.</div><div class=''>./ALU_vFIles/mux_2.v:7: error: Module mux_2 was already declared here: ./multDiv_files/mux_2.v:1</div><div class=''></div><div class=''>./RegGile_files/dffe_ref.v:1: error: 'dffe_ref' has already been declared in this scope.</div><div class=''>./multDiv_files/dffe_ref.v:1:      : It was declared here as a module.</div><div class=''>./RegGile_files/dffe_ref.v:31: error: Module dffe_ref was already declared here: ./multDiv_files/dffe_ref.v:1</div></div><div class='content-block'><div class=''>==================== Results ====================</div></div><div class='content-block'><div class=''>==================== Runtime Errors ====================</div><div class=''>proc_positive_no_bypass.vvp: Unable to open input file.</div></div></div></div></body></html>
