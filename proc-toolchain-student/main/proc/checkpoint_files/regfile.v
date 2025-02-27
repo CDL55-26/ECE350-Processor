@@ -22,7 +22,7 @@ wire [31:0] read_ctrlA, read_ctrlB, write_decode;
 assign read_ctrlA = 32'b1 << ctrl_readRegA;
 assign read_ctrlB = 32'b1 << ctrl_readRegB;
 
-//Wrote Decoder
+//Write Decoder
 assign write_decode = ctrl_writeEnable ? (32'b1 << ctrl_writeReg) : 32'b0;
 
 //zero register
