@@ -95,8 +95,6 @@ module processor(
     // Control Signals
     wire RegFile_WE, B_immediate_mux_sel;
 
-
-
     /*Instruction decoders and parsing*/
 
         //setup decoders

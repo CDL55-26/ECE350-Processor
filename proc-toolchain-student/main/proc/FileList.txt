@@ -1,7 +1,7 @@
+./Wrapper_tb.v
 ./Wrapper.v
 ./RAM.v
 ./processor.v
-./ROM.v
 ./checkpoint_files/Barrel_Shifter.v
 ./checkpoint_files/register128.v
 ./checkpoint_files/CLA32.v
@@ -39,4 +39,4 @@
 ./checkpoint_files/exception_unit.v
 ./checkpoint_files/inverter.v
 ./checkpoint_files/Bit_OR.v
-../../test_files/Wrapper_tb.v
+./ROM.v
