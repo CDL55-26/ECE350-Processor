@@ -63,7 +63,7 @@ module processor(
 
 	/* YOUR CODE STARTS HERE */
 
-    /*Wires*/
+    /* Wires */
 
     //PC Wires
     wire [31:0] PC_output, PC_in, PC_adder_output;
@@ -95,13 +95,13 @@ module processor(
     // Control Signals
     wire RegFile_WE, B_immediate_mux_sel;
 
-    /*Instruction decoders and parsing*/
+    /* Instruction decoders and parsing */
 
         //setup decoders
         assign DX_instruction_decoder = 32'b1 << DX_opcode_wire; //5bit decoder with imem output (instruction) as input
         assign WB_instruction_decoder = 32'b1 << WB_opcode_wire;
 
-        /*FD Instruction*/
+        /* FD Instruction */
             //parse instructions
             assign FD_opcode_wire = FD_Latch_Instr[31:27];
             assign FD_rd_wire = FD_Latch_Instr[26:22];
@@ -113,7 +113,7 @@ module processor(
             //immediate for i-type
             assign FD_immediate_wire = FD_Latch_Instr[16:0];
 
-        /*DX Instruction*/
+        /* DX Instruction */
             //parse instructions
             assign DX_opcode_wire = DX_Latch_Instr[31:27];
             assign DX_rd_wire = DX_Latch_Instr[26:22];
@@ -126,7 +126,7 @@ module processor(
             assign DX_immediate_wire = DX_Latch_Instr[16:0];
 
 
-        /*WB Instructions*/
+        /* WB Instructions */
             //parse instructions
             assign WB_opcode_wire = WB_Latch_Instr[31:27];
             assign WB_rd_wire = WB_Latch_Instr[26:22];
@@ -140,28 +140,28 @@ module processor(
 
 
 
-    /*Control Wires*/
+    /* Control Wires */
 
         //enable reg file for opcode of 0 (alu ops) or 101 = addi
-        assign RegFile_WE = WB_instruction_decoder[0] | WB_instruction_decoder[5]; //*****WILL HAVE TO CHANGE WHEN ADDING LATCHES
+        assign RegFile_WE = WB_instruction_decoder[0] | WB_instruction_decoder[5]; // *****WILL HAVE TO CHANGE WHEN ADDING LATCHES
         
         //Choose s-extended immediate from mux if i-type
-        assign B_immediate_mux_sel = DX_instruction_decoder[5]; //*****WILL HAVE TO CHANGE WHEN ADDING LATCHED
+        assign B_immediate_mux_sel = DX_instruction_decoder[5]; // *****WILL HAVE TO CHANGE WHEN ADDING LATCHED
 
     
-    /*Program Counter*/
+    /* Program Counter */
 
         //setup PC
         register PC_register(PC_output, PC_in, reset, 1'b1, clock ); //rising edge, always enabled
 
         CLA32 PC_adder(PC_adder_output, PC_adder_OVF, PC_output, 32'b1, 1'b0); //carry in zero
-        assign PC_in = PC_adder_output; //*****WILL NEED TO CHANGE***** assuming pc always = pc +1
+        assign PC_in = PC_adder_output; // ***** WILL NEED TO CHANGE ***** assuming pc always = pc +1
 
         //Handle Ins ROM
         assign address_imem = PC_output; //imem address = current PC, not PC +1
     
     /*Pipeline Latches*/
-        /* FD Latch **********************/
+        /* FD Latch ********************* */
         //input to FD latch is the instr from imem and will be PC in up 32 bits, right now ignorning, inputting zeros
         
         assign FD_Latch_input = {PC_adder_output, q_imem}; //uper 32 bits = PC + 1, will use for control later
@@ -171,7 +171,7 @@ module processor(
         assign FD_Latch_PC = FD_Latch_output[63:32];
         assign FD_Latch_Instr = FD_Latch_output[31:0];
 
-        /* DX Latch **********************/
+        /* DX Latch ********************* */
         //Upper 32b should be PC from FD_Latch_output, lower 32b should be instr passed from FD latch
         assign DX_Latch_input = {FD_Latch_PC, data_readRegA, data_readRegB, FD_Latch_Instr};
 
@@ -184,7 +184,7 @@ module processor(
 
 
 
-        /* WB Latch **********************/
+        /* WB Latch ********************* */
 
         assign WB_Latch_input = {DX_Latch_PC, execute_ALU_out_wire, DX_Latch_Instr};
 
