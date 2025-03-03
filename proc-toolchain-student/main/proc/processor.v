@@ -81,11 +81,11 @@ module processor(
     wire [16:0] DX_immediate_wire;
     wire [4:0] DX_opcode_wire, DX_rd_wire, DX_rs_wire, DX_rt_wire, DX_shamt_wire, DX_ALU_op_wire;
 
-    // WB Latch Wires
-    wire [95:0] WB_Latch_input, WB_Latch_output;
-    wire [31:0] WB_Latch_PC, WB_Latch_Instr, WB_Latch_writeVal, WB_instruction_decoder;
-    wire [16:0] WB_immediate_wire;
-    wire [4:0] WB_opcode_wire, WB_rd_wire, WB_rs_wire, WB_rt_wire, WB_shamt_wire, WB_ALU_op_wire;
+    // XM Latch Wires
+    wire [95:0] XM_Latch_input, XM_Latch_output;
+    wire [31:0] XM_Latch_PC, XM_Latch_Instr, XM_Latch_writeVal, XM_instruction_decoder;
+    wire [16:0] XM_immediate_wire;
+    wire [4:0] XM_opcode_wire, XM_rd_wire, XM_rs_wire, XM_rt_wire, XM_shamt_wire, XM_ALU_op_wire;
     
     // execute_ALU Wires
     wire [31:0] execute_ALU_out_wire, SEX_DX_immediate_wire, B_immediate_mux_out;
@@ -99,7 +99,7 @@ module processor(
 
         //setup decoders
         assign DX_instruction_decoder = 32'b1 << DX_opcode_wire; //5bit decoder with imem output (instruction) as input
-        assign WB_instruction_decoder = 32'b1 << WB_opcode_wire;
+        assign XM_instruction_decoder = 32'b1 << XM_opcode_wire;
 
         /* FD Instruction */
             //parse instructions
@@ -126,24 +126,24 @@ module processor(
             assign DX_immediate_wire = DX_Latch_Instr[16:0];
 
 
-        /* WB Instructions */
+        /* XM Instructions */
             //parse instructions
-            assign WB_opcode_wire = WB_Latch_Instr[31:27];
-            assign WB_rd_wire = WB_Latch_Instr[26:22];
-            assign WB_rs_wire = WB_Latch_Instr[21:17];
-            assign WB_rt_wire = WB_Latch_Instr[16:12];
-            assign WB_shamt_wire = WB_Latch_Instr[11:7];
-            assign WB_ALU_op_wire = WB_Latch_Instr[6:2];
+            assign XM_opcode_wire = XM_Latch_Instr[31:27];
+            assign XM_rd_wire = XM_Latch_Instr[26:22];
+            assign XM_rs_wire = XM_Latch_Instr[21:17];
+            assign XM_rt_wire = XM_Latch_Instr[16:12];
+            assign XM_shamt_wire = XM_Latch_Instr[11:7];
+            assign XM_ALU_op_wire = XM_Latch_Instr[6:2];
 
             //immediate for i-type
-            assign WB_immediate_wire = WB_Latch_Instr[16:0];
+            assign XM_immediate_wire = XM_Latch_Instr[16:0];
 
 
 
     /* Control Wires */
 
         //enable reg file for opcode of 0 (alu ops) or 101 = addi
-        assign RegFile_WE = WB_instruction_decoder[0] | WB_instruction_decoder[5]; // *****WILL HAVE TO CHANGE WHEN ADDING LATCHES
+        assign RegFile_WE = XM_instruction_decoder[0] | XM_instruction_decoder[5]; // *****WILL HAVE TO CHANGE WHEN ADDING LATCHES
         
         //Choose s-extended immediate from mux if i-type
         assign B_immediate_mux_sel = DX_instruction_decoder[5]; // *****WILL HAVE TO CHANGE WHEN ADDING LATCHED
@@ -184,24 +184,24 @@ module processor(
 
 
 
-        /* WB Latch ********************* */
+        /* XM Latch ********************* */
 
-        assign WB_Latch_input = {DX_Latch_PC, execute_ALU_out_wire, DX_Latch_Instr};
+        assign XM_Latch_input = {DX_Latch_PC, execute_ALU_out_wire, DX_Latch_Instr};
 
-        //WB Latch
-        register96 WB_Latch(WB_Latch_output, WB_Latch_input, reset, 1'b1, ~clock); //enable to latch always 1, falling edge reg
-        assign WB_Latch_PC = WB_Latch_output[95:64];
-        assign WB_Latch_writeVal = WB_Latch_output[63:32];
-        assign WB_Latch_Instr = WB_Latch_output[31:0];
+        //XM Latch
+        register96 XM_Latch(XM_Latch_output, XM_Latch_input, reset, 1'b1, ~clock); //enable to latch always 1, falling edge reg
+        assign XM_Latch_PC = XM_Latch_output[95:64];
+        assign XM_Latch_writeVal = XM_Latch_output[63:32];
+        assign XM_Latch_Instr = XM_Latch_output[31:0];
         
     
     /*Register File Handling*/
 
         assign ctrl_writeEnable = RegFile_WE; //WE determined by DX instr *****WILL HAVE TO CHANGE TO UPDATE LATCH
-        assign ctrl_writeReg = WB_rd_wire; //writing to register determined by DX latch instr ****WILL HAVE TO CHANGE IN FUTURE***
+        assign ctrl_writeReg = XM_rd_wire; //writing to register determined by DX latch instr ****WILL HAVE TO CHANGE IN FUTURE***
         assign ctrl_readRegA = FD_rs_wire; //reading from FD rs
         assign ctrl_readRegB = FD_rt_wire; //reading from FD rt
-        assign data_writeReg = WB_Latch_writeVal; //data to write to the register
+        assign data_writeReg = XM_Latch_writeVal; //data to write to the register
 
     /*ALU Handling*/
 

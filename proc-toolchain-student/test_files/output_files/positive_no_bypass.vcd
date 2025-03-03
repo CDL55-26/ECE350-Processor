@@ -1,5 +1,5 @@
 $date
-	Thu Feb 27 15:22:20 2025
+	Thu Feb 27 18:33:45 2025
 $end
 $version
 	Icarus Verilog
@@ -63,19 +63,19 @@ $var wire 1 O execute_overflow $end
 $var wire 1 P execute_isNotEqual $end
 $var wire 1 Q execute_isLessThan $end
 $var wire 32 R execute_ALU_out_wire [31:0] $end
-$var wire 5 S WB_shamt_wire [4:0] $end
-$var wire 5 T WB_rt_wire [4:0] $end
-$var wire 5 U WB_rs_wire [4:0] $end
-$var wire 5 V WB_rd_wire [4:0] $end
-$var wire 5 W WB_opcode_wire [4:0] $end
-$var wire 32 X WB_instruction_decoder [31:0] $end
-$var wire 17 Y WB_immediate_wire [16:0] $end
-$var wire 32 Z WB_Latch_writeVal [31:0] $end
-$var wire 96 [ WB_Latch_output [95:0] $end
-$var wire 96 \ WB_Latch_input [95:0] $end
-$var wire 32 ] WB_Latch_PC [31:0] $end
-$var wire 32 ^ WB_Latch_Instr [31:0] $end
-$var wire 5 _ WB_ALU_op_wire [4:0] $end
+$var wire 5 S XM_shamt_wire [4:0] $end
+$var wire 5 T XM_rt_wire [4:0] $end
+$var wire 5 U XM_rs_wire [4:0] $end
+$var wire 5 V XM_rd_wire [4:0] $end
+$var wire 5 W XM_opcode_wire [4:0] $end
+$var wire 32 X XM_instruction_decoder [31:0] $end
+$var wire 17 Y XM_immediate_wire [16:0] $end
+$var wire 32 Z XM_Latch_writeVal [31:0] $end
+$var wire 96 [ XM_Latch_output [95:0] $end
+$var wire 96 \ XM_Latch_input [95:0] $end
+$var wire 32 ] XM_Latch_PC [31:0] $end
+$var wire 32 ^ XM_Latch_Instr [31:0] $end
+$var wire 5 _ XM_ALU_op_wire [4:0] $end
 $var wire 32 ` SEX_DX_immediate_wire [31:0] $end
 $var wire 1 a R_S_ALU_mux_sel $end
 $var wire 32 b PC_output [31:0] $end
@@ -2906,7 +2906,7 @@ $var wire 5 \- in1 [4:0] $end
 $var wire 1 a select $end
 $var wire 5 ]- out [4:0] $end
 $upscope $end
-$scope module WB_Latch $end
+$scope module XM_Latch $end
 $var wire 1 ^- clk $end
 $var wire 1 : clr $end
 $var wire 96 _- data_in [95:0] $end
