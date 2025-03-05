@@ -87,14 +87,15 @@ module processor(
     wire [31:0] XM_Latch_PC, XM_Latch_Instr, XM_Latch_xOut, XM_Latch_B;
     wire [16:0] XM_immediate_wire;
     wire [4:0] XM_opcode_wire, XM_rd_wire, XM_rs_wire, XM_rt_wire, XM_shamt_wire, XM_ALU_op_wire;
+    wire XM_ErrorFlag_Latch_out, XM_ErrorFlag_mux_out;
 
     //WB Latch Wires
     wire [127:0] WB_Latch_input, WB_Latch_output;
     wire [31:0] WB_Latch_PC, WB_Latch_Instr, WB_Latch_xOut, WB_Latch_dOut, WB_target;
+    wire [31:0] X_D_mux_out, WB_T_PC1_mux_out, WB_xm_ctrl_mux_out, WB_Exception_Value_mux_out, WB_ALU_exception_addi_mux_out, WB_Exception_xOut_mux_out;
     wire [16:0] WB_immediate_wire;
-    wire [4:0] WB_opcode_wire, WB_rd_wire, WB_rs_wire, WB_rt_wire, WB_shamt_wire, WB_ALU_op_wire, jal_setx_mux_out, WB_mux_out;
-
-    wire [31:0] X_D_mux_out, WB_T_PC1_mux_out, WB_xm_ctrl_mux_out;
+    wire [4:0] WB_opcode_wire, WB_rd_wire, WB_rs_wire, WB_rt_wire, WB_shamt_wire, WB_ALU_op_wire, jal_setx_mux_out, WB_mux_out, WB_Exception_Destination_mux_out;
+    wire WB_ErrorFlag_Latch_out;
 
 
     //execute_ALU Wires
@@ -276,8 +277,13 @@ module processor(
         assign XM_Latch_B = XM_Latch_output[63:32];
         assign XM_Latch_Instr = XM_Latch_output[31:0];
 
+        //XM_ErrorFlag_Latch
+        mux_2_1bit XM_ErrorFlag_mux(XM_ErrorFlag_mux_out, multDiv_start, execute_overflow, multDiv_exception); //if multDiv instr, take the multDIv exception
+        //wire annoying_bullshit_out;
+        dffe_ref XM_ErrorFlag_Latch(XM_ErrorFlag_Latch_out, XM_ErrorFlag_mux_out, ~clock, reg_latch_enable, reset);
+        //dffe_ref annoying_bullshit(annoying_bullshit_out, 1'b1, reset, 1'b1, ~clock );
 
-        /* WB Latch ********************* ALLL WRONG RN */ 
+        /* WB Latch ********************* */ 
         assign WB_Latch_input = {XM_Latch_PC, XM_Latch_xOut, q_dmem, XM_Latch_Instr};
 
         //WB Latch
@@ -286,6 +292,9 @@ module processor(
         assign WB_Latch_xOut = WB_Latch_output[95:64];
         assign WB_Latch_dOut = WB_Latch_output[63:32];
         assign WB_Latch_Instr = WB_Latch_output[31:0];
+
+        //WB_ErrorFlag_Latch
+        dffe_ref WB_ErrorFlag_Latch(WB_ErrorFlag_Latch_out, XM_ErrorFlag_Latch_out, ~clock, reg_latch_enable, reset);
 
         
     /*Register File Handling*/
@@ -303,8 +312,8 @@ module processor(
         assign ctrl_readRegB = rt_rs_mux_out; //choose rs or rt
         
         
-        assign ctrl_writeReg = WB_mux_out; //write to reg determined by WB control muxes
-        assign data_writeReg = WB_xm_ctrl_mux_out; //data to write to the register, from WB mux tree
+        assign ctrl_writeReg = WB_Exception_Destination_mux_out; //write to reg determined by WB control muxes
+        assign data_writeReg = WB_Exception_xOut_mux_out; //data to write to the register, from WB mux tree
 
 
     /*Execute Stage*/
@@ -347,14 +356,32 @@ module processor(
     /*Write Back Stage*/
 
         //Write Back Muxes
-        mux_2 X_D_mux(X_D_mux_out, X_D_mux_select, WB_Latch_xOut, WB_Latch_dOut); //if 1, choose data mem -> load word
-        mux_2 WB_T_PC1_mux(WB_T_PC1_mux_out, WB_T_PC1_mux_select, WB_Latch_PC, WB_target );
 
-        mux_2 WB_xm_ctrl_mux(WB_xm_ctrl_mux_out, WB_xm_ctrl_mux_select, X_D_mux_out, WB_T_PC1_mux_out); //choose WB latch out or T/PC+1
+            //Data 
+            mux_2 X_D_mux(X_D_mux_out, X_D_mux_select, WB_Latch_xOut, WB_Latch_dOut); //if 1, choose data mem -> load word
+            
+            mux_2 WB_T_PC1_mux(WB_T_PC1_mux_out, WB_T_PC1_mux_select, WB_Latch_PC, WB_target );
+            
+            mux_2 WB_xm_ctrl_mux(WB_xm_ctrl_mux_out, WB_xm_ctrl_mux_select, X_D_mux_out, WB_T_PC1_mux_out); //choose WB latch out or T/PC+1
 
-        mux_2_5bit jal_setx_mux(jal_setx_mux_out, jal_setx_mux_select, 5'b11110, 5'b11111); //if 1, write to reg 31, else write to reg 30
-        
-        mux_2_5bit WB_mux(WB_mux_out, WB_mux_select, WB_rd_wire, jal_setx_mux_out); //if 1, take the control mux, else take rs from WB latch
+            mux_8 WB_Exception_Value_mux(WB_Exception_Value_mux_out, WB_ALU_op_wire[2:0], 32'd1, 32'd3, 32'd0, 32'd0, 32'd0, 32'd0, 32'd4, 32'd5);
+            mux_2 WB_ALU_exception_addi_mux(WB_ALU_exception_addi_mux_out, WB_opcode_wire[0], WB_Exception_Value_mux_out, 32'd2); //if ALu op, take above, else use addi errof val
+
+            mux_2 WB_Exception_xOut_mux(WB_Exception_xOut_mux_out, WB_ErrorFlag_Latch_out, WB_xm_ctrl_mux_out, WB_ALU_exception_addi_mux_out);
+
+
+            //Destination
+            mux_2_5bit jal_setx_mux(jal_setx_mux_out, jal_setx_mux_select, 5'b11110, 5'b11111); //if 1, write to reg 31, else write to reg 30
+            
+            mux_2_5bit WB_mux(WB_mux_out, WB_mux_select, WB_rd_wire, jal_setx_mux_out); //if 1, take the control mux, else take rs from WB latch
+
+            mux_2_5bit WB_Exception_Destination_mux(WB_Exception_Destination_mux_out, WB_ErrorFlag_Latch_out, WB_mux_out, 5'b11110); //if exception flag, write to reg 30
+
+        //Error Muxes
+
+
+
+
 
 	/* END CODE */
 

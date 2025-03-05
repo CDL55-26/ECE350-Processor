@@ -50,7 +50,7 @@ module multiplier(
     assign shifted_reg_in = concat_reg_in >>> 1; //right shift everything by 1 
 
     assign data_result = reg_out[32:1];
-    assign data_resultRDY = count_wire;
+    assign data_resultRDY = count_wire & ~ctrl_MULT;
     assign latch_enable = ~count_wire;
 
     exception_unit eu(exception_unit_out,data_operandA,data_operandB);

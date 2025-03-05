@@ -48,6 +48,6 @@ module divider(
     //Error logic
     assign div_by_zero = ~(|data_operandB[31:0]); //if opB is all zeros, assert 1 
     assign data_exception = (|OVF_bus[1:0] | div_by_zero); //ovf from adder or div by zero
-    assign data_resultRDY = count_wire; //count down
+    assign data_resultRDY = count_wire & ~ctrl_DIV; //count down
 
 endmodule

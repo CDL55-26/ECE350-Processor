@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.4.0 (w)1999-2022 BSI
-[*] Tue Mar  4 06:52:16 2025
+[*] Wed Mar  5 04:36:44 2025
 [*]
-[dumpfile] "/Users/carterlevine/ECE350/ECE350-Processor/proc-toolchain-student/test_files/output_files/bne_no_bypass.vcd"
-[dumpfile_mtime] "Tue Mar  4 06:48:28 2025"
-[dumpfile_size] 982229
+[dumpfile] "/Users/carterlevine/ECE350/ECE350-Processor/proc-toolchain-student/test_files/output_files/exceptions_no_bypass.vcd"
+[dumpfile_mtime] "Wed Mar  5 04:02:43 2025"
+[dumpfile_size] 1630301
 [savefile] "/Users/carterlevine/ECE350/ECE350-Processor/proc-toolchain-student/test_files/output_files/debug.gtkw"
-[timestart] 265800
+[timestart] 1056800
 [size] 1440 792
 [pos] -1 -1
-*-16.480579 460000 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+*-16.480579 1199900 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 [markername] AA
 [markername] BB
 [markername] CC
@@ -40,19 +40,11 @@
 [treeopen] Wrapper_tb.CPU.
 [treeopen] Wrapper_tb.CPU.control_module.
 [sst_width] 255
-[signals_width] 426
+[signals_width] 316
 [sst_expanded] 1
 [sst_vpaned_height] 539
 @28
 Wrapper_tb.CPU.DX_Latch.clk
-@800200
--FD
-@28
-Wrapper_tb.CPU.FD_Latch_Instr[31:0]
-@24
-Wrapper_tb.CPU.FD_Latch_PC[31:0]
-@1000200
--FD
 @800200
 -DX
 @24
@@ -81,7 +73,6 @@ Wrapper_tb.CPU.ctrl_readRegB[4:0]
 Wrapper_tb.CPU.ctrl_writeEnable
 @28
 Wrapper_tb.CPU.control_module.comp_isNotEqual
-@29
 Wrapper_tb.CPU.control_module.comp_isLessThan
 @24
 [color] 6
@@ -94,27 +85,36 @@ Wrapper_tb.CPU.data_readRegB[31:0]
 @24
 Wrapper_tb.CPU.rs_rd_mux_out[4:0]
 Wrapper_tb.CPU.rt_rs_mux_out[4:0]
+Wrapper_tb.CPU.WB_Exception_xOut_mux_out[31:0]
 @1000200
 -Register
 @800200
--Write Back Ctrl
+-Error Flags
 @28
-Wrapper_tb.CPU.WB_Latch_Instr[31:0]
+[color] 3
+Wrapper_tb.CPU.WB_ErrorFlag_Latch_out
+[color] 3
+Wrapper_tb.CPU.XM_ErrorFlag_Latch_out
+[color] 3
+Wrapper_tb.CPU.XM_ErrorFlag_mux_out
+[color] 3
+Wrapper_tb.CPU.execute_overflow
+[color] 3
+Wrapper_tb.CPU.multDiv_exception
+Wrapper_tb.CPU.multDiv_start
+Wrapper_tb.CPU.reg_latch_enable
+Wrapper_tb.CPU.reset
+Wrapper_tb.CPU.multDiv_dataRDY
 @24
-Wrapper_tb.CPU.WB_mux_out[4:0]
+[color] 1
+Wrapper_tb.CPU.WB_xm_ctrl_mux_out[31:0]
+[color] 1
+Wrapper_tb.CPU.WB_ALU_exception_addi_mux_out[31:0]
 @28
-Wrapper_tb.CPU.WB_mux_select
+Wrapper_tb.CPU.multDiv_ctrl_DFF_out
+@29
+Wrapper_tb.CPU.multDiv_start
 @1000200
--Write Back Ctrl
-@800200
--PC
-@24
-Wrapper_tb.CPU.PC_in[31:0]
-@28
-Wrapper_tb.CPU.PC_ctrl_mux_select
-Wrapper_tb.CPU.B_J_mux_select
-Wrapper_tb.CPU.T_rd_mux_select
-@1000200
--PC
+-Error Flags
 [pattern_trace] 1
 [pattern_trace] 0
