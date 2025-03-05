@@ -9,6 +9,7 @@
 ./checkpoint_files/BS2.v
 ./checkpoint_files/BS8.v
 ./checkpoint_files/sign_module.v
+./checkpoint_files/multDiv_assert_unit.v
 ./checkpoint_files/alu.v
 ./checkpoint_files/register64.v
 ./checkpoint_files/register.v

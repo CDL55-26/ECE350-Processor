@@ -39,7 +39,7 @@ module control(
 
         assign assert_mult = DX_ALU_op_decoder[6] & ~(|DX_opcode_wire[4:0]);
         assign assert_div = DX_ALU_op_decoder[7] & ~(|DX_opcode_wire[4:0]);
-        assign ALU_multDiv_mux_control = (DX_ALU_op_decoder[7] | DX_ALU_op_decoder[6]) & ~(|DX_opcode_wire[4:0]);;
+        assign ALU_multDiv_mux_control = (DX_ALU_op_decoder[7] | DX_ALU_op_decoder[6]) & ~(|DX_opcode_wire[4:0]);
 
     //Control Bits
 

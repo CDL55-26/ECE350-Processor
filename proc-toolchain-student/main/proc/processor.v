@@ -72,13 +72,13 @@ module processor(
 
     //FD Latch Wires
     wire [63:0] FD_Latch_input, FD_Latch_output;
-    wire [31:0] FD_Latch_PC, FD_Latch_Instr;
+    wire [31:0] FD_Latch_PC, FD_Latch_Instr, FD_Bypass_mux_out;
     wire [16:0] FD_immediate_wire;
     wire [4:0] FD_opcode_wire, FD_rd_wire, FD_rs_wire, FD_rt_wire, FD_shamt_wire, FD_ALU_op_wire;
 
     //DX Latch Wires
     wire [127:0] DX_Latch_input, DX_Latch_output;
-    wire [31:0] DX_Latch_PC, DX_Latch_A, DX_Latch_B, DX_Latch_Instr, DX_target;
+    wire [31:0] DX_Latch_PC, DX_Latch_A, DX_Latch_B, DX_Latch_Instr, DX_target, DX_Bypass_mux_out;
     wire [16:0] DX_immediate_wire;
     wire [4:0] DX_opcode_wire, DX_rd_wire, DX_rs_wire, DX_rt_wire, DX_shamt_wire, DX_ALU_op_wire;
 
@@ -108,7 +108,7 @@ module processor(
     //multDiv Wires
     wire [31:0] multDiv_out;
     wire  multDiv_ctrl_DFF_out;
-    wire multDiv_exception, multDiv_dataRDY;
+    wire multDiv_exception, multDiv_dataRDY, start_mult,start_div;
 
     //control wires
     wire [4:0] DX_opcode_OR;
@@ -157,7 +157,7 @@ module processor(
             .DX_Latch_B(DX_Latch_B)
         );
         //either mult or div asserted
-        assign multDiv_start = assert_div | assert_mult;
+        assign multDiv_start = assert_div | assert_mult; //freeze latches when div or mult asserted
         assign reg_latch_enable = ~multDiv_ctrl_DFF_out;
 
     /* Instruction decoders and parsing */
@@ -239,7 +239,9 @@ module processor(
     /*Pipeline Latches*/
         /* FD Latch ********************* */
         
-        assign FD_Latch_input = {PC_adder_output, q_imem}; //uper 32 bits = PC + 1, will use for control later
+        mux_2 FD_Bypass_mux(FD_Bypass_mux_out, PC_ctrl_mux_select, q_imem, 32'b0); //if taken branch, fill in with Nop
+        
+        assign FD_Latch_input = {PC_adder_output, FD_Bypass_mux_out}; //uper 32 bits = PC + 1, will use for control later
 
         register64 FD_Latch(FD_Latch_output, FD_Latch_input, reset, reg_latch_enable, ~clock); //enable to latch always 1, falling edge reg
 
@@ -250,7 +252,10 @@ module processor(
 
         /* DX Latch ********************* */
         //Upper 32b should be PC from FD_Latch_output, lower 32b should be instr passed from FD latch
-        assign DX_Latch_input = {FD_Latch_PC, data_readRegA, data_readRegB, FD_Latch_Instr};
+
+        mux_2 DX_Bypass_mux(DX_Bypass_mux_out, PC_ctrl_mux_select, FD_Latch_Instr, 32'b0); //if taken branch, flush instr with nop
+
+        assign DX_Latch_input = {FD_Latch_PC, data_readRegA, data_readRegB, DX_Bypass_mux_out};
 
         //DX Latch
         register128 DX_Latch(DX_Latch_output, DX_Latch_input, reset, reg_latch_enable, ~clock); //enable to latch always 1, falling edge reg
@@ -318,13 +323,16 @@ module processor(
         
         multdiv multDiv_unit(
             DX_Latch_A, DX_Latch_B,
-            assert_mult,assert_div,clock,
+            start_mult, start_div, clock,
             multDiv_out,
             multDiv_exception, multDiv_dataRDY
         );
 
         //when multDiv asserted, enable dff, latch 1 : reset when multDiv_dataRDY asserted
         dffe_ref multDiv_ctrl_DFF(multDiv_ctrl_DFF_out, 1'b1, clock, multDiv_start, multDiv_dataRDY);
+
+        //series DFFs, should enable mult / div for one cycle, reset on data rdy
+        multDiv_assert_unit multDiv_start_unit(start_mult, start_div, assert_mult, assert_div, clock, multDiv_dataRDY);
 
         //ALU control
         mux_2 ALU_multDiv_mux(ALU_multDiv_mux_out, ALU_multDiv_mux_control, execute_ALU_out_wire, multDiv_out);
